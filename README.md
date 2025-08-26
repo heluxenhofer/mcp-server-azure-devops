@@ -27,6 +27,8 @@
 
 This project demonstrates how to create an MCP Server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk) to manage Azure DevOps resources. It provides tools for listing projects, repositories, branches, and creating new branches via MCP server integration. All operations require authentication via Microsoft Entra ID, using the on-behalf-of flow for Azure DevOps.
 
+<video src="docs/videos/showcase.mp4" width="640" height="480" controls></video>
+
 For a full-featured MCP solution, check out the official MCP Azure DevOps server by Microsoft: https://github.com/microsoft/azure-devops-mcp
 
 ## Features
@@ -110,10 +112,10 @@ This MCP Server uses Microsoft Entra ID for authentication and authorization. Yo
 4. Create a client secret ([instructions](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials?tabs=client-secret)).
 5. Add API permissions as shown below:
 
-   ![Entra ID application api permissions](images/api-permissions.png)
+   ![Entra ID application api permissions](docs/images/api-permissions.png)
 6. Expose an API and create the scope `mcp.tools`:
 
-   ![Entra ID application api scope](images/scope.png)
+   ![Entra ID application api scope](docs/images/scope.png)
 
 ## Configuration
 
