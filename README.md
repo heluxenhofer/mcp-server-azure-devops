@@ -27,6 +27,8 @@
 
 This project demonstrates how to create an MCP Server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk) to manage Azure DevOps resources. It provides tools for listing projects, repositories, branches, and creating new branches via MCP server integration. All operations require authentication via Microsoft Entra ID, using the on-behalf-of flow for Azure DevOps.
 
+For a full-featured MCP solution, check out the official MCP Azure DevOps server by Microsoft: https://github.com/microsoft/azure-devops-mcp
+
 ## Features
 
 - List all Azure DevOps projects for an organization
