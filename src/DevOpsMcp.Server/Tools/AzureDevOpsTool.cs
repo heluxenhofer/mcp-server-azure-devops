@@ -140,8 +140,9 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
         {
             Properties =
             {
-                ["ParentBranch"] = enumSchema
-            }
+                ["ParentBranch"] = enumSchema,
+            },
+            Required = new[] { "ParentBranch" }
         };
 
         var branchResponse = await server.ElicitAsync(new ElicitRequestParams
