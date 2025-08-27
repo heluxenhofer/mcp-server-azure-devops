@@ -7,7 +7,6 @@
 
 - [Overview](#overview)
 - [Features](#features)
-- [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Authentication & Permissions](#authentication--permissions)
@@ -37,36 +36,6 @@ For a full-featured MCP solution, check out the official MCP Azure DevOps server
 - List all repositories for a project
 - List all branches for a repository
 - Create a new branch from an existing branch
-
-## Project Structure
-
-```
-mcp-server-azure-devops/
-├── .gitignore
-├── CONTRIBUTING.md
-├── LICENSE
-├── nuget.config
-├── README.md
-├── .github/
-│   └── workflows/
-├── images/
-│   ├── api-permissions.png
-│   └── scope.png
-└── src/
-  ├── DevOpsMcp.sln
-  ├── DevOpsMcp.Server/
-	  ├── appsettings.json
-	  ├── DevOpsMcp.Server.csproj
-	  ├── DevOpsTokenHandler.cs
-	  ├── Program.cs
-	  ├── Settings.cs
-	  ├── Properties/
-	  │   └── launchSettings.json
-	  ├── Services/
-	  │   └── TokenService.cs
-	  ├── Tools/
-	  │   └── AzureDevOpsTool.cs
-```
 
 ## Prerequisites
 

@@ -1,0 +1,7 @@
+{
+    "action": "accept",
+    "content": {
+        "ParentBranch": "main"
+    },
+    "_meta": null
+}

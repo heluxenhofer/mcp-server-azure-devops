@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "ParentBranch": {
+            "type": "string",
+            "enum": [
+                "main"
+            ]
+        }
+    },
+    "required": [
+        "ParentBranch"
+    ]
+}
