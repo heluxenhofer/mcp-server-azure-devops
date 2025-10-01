@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: mcp-server-azure-devops
+metadata:
+    template: azd-init@1.19.0
+services:
+    devopsmcp-server:
+        project: src/DevOpsMcp.Server
+        host: containerapp
+        language: dotnet
+resources:
+    devopsmcp-server:
+        type: host.containerapp
+        port: 8080
+hooks:
+  postdeploy:
+    shell: pwsh
+    run: ./set-env-vars.ps1
