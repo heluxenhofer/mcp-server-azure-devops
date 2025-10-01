@@ -95,7 +95,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
                         var fullName = nameElement.GetString();
                         if (fullName != null && fullName.StartsWith("refs/heads/"))
                         {
-                            branches.Add(fullName.Substring("refs/heads/".Length));
+                            branches.Add(fullName["refs/heads/".Length..]);
                         }
                     }
                 }
@@ -107,7 +107,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             throw;
         }
 
-        return branches.ToArray();
+        return [.. branches];
     }
     /// <summary>
     /// Creates a new branch in a repository. If parent branch is not provided, user will be asked.
@@ -142,7 +142,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             {
                 ["ParentBranch"] = enumSchema,
             },
-            Required = new[] { "ParentBranch" }
+            Required = ["ParentBranch"]
         };
 
         var branchResponse = await server.ElicitAsync(new ElicitRequestParams
