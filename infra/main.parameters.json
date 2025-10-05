@@ -16,6 +16,18 @@
       },
       "principalType": {
         "value": "${AZURE_PRINCIPAL_TYPE}"
+      },
+      "azureAdTenantId": {
+        "value": "${AZUREAD_TENANTID}"
+      },
+      "azureAdClientId": {
+        "value": "${AZUREAD_CLIENTID}"
+      },
+      "azureAdClientSecretName": {
+        "value": "AzureAdClientSecret"
+      },
+      "azureAdClientSecret": {
+        "value": "${AZUREAD_CLIENTSECRET}"
       }
     }
 }

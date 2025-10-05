@@ -17,7 +17,15 @@ param principalId string
 
 @description('Principal type of user or app')
 param principalType string
-
+@description('The Azure AD tenant ID for the application')
+param azureAdTenantId string
+@description('The Azure AD client ID for the application')
+param azureAdClientId string
+@description('Name of the secret in Key Vault that contains the Azure AD client secret for the application')
+param azureAdClientSecretName string
+@description('The Azure AD client secret for the application')
+@secure()
+param azureAdClientSecret string
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -43,7 +51,16 @@ module resources 'resources.bicep' = {
     principalId: principalId
     principalType: principalType
     devopsmcpServerExists: devopsmcpServerExists
+    azureAdClientId: azureAdClientId
+    azureAdTenantId: azureAdTenantId
+    azureAdClientSecretName: azureAdClientSecretName
+    azureAdClientSecret: azureAdClientSecret
   }
 }
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
-output AZURE_RESOURCE_DEVOPSMCP_SERVER_ID string = resources.outputs.AZURE_RESOURCE_DEVOPSMCP_SERVER_ID
+output AZURE_KEY_VAULT_ENDPOINT string = resources.outputs.AZURE_KEY_VAULT_ENDPOINT
+output AZURE_KEY_VAULT_NAME string = resources.outputs.AZURE_KEY_VAULT_NAME
+output AZURE_RESOURCE_VAULT_ID string = resources.outputs.AZURE_RESOURCE_VAULT_ID
+output AZURE_CONTAINER_APP_FQDN string = resources.outputs.AZURE_CONTAINER_APP_FQDN
+output AZURE_CONTAINER_APP_NAME string = resources.outputs.AZURE_CONTAINER_APP_NAME
+output AZURE_RESOURCE_GROUP_NAME string = rg.name

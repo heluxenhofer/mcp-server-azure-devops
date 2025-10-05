@@ -13,6 +13,16 @@ param principalId string
 @description('Principal type of user or app')
 param principalType string
 
+@description('The Azure AD tenant ID for the application')
+param azureAdTenantId string
+@description('The Azure AD client ID for the application')
+param azureAdClientId string
+@description('Name of the secret in Key Vault that contains the Azure AD client secret for the application')
+param azureAdClientSecretName string
+@description('The Azure AD client secret for the application')
+@secure()
+param azureAdClientSecret string
+
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = uniqueString(subscription().id, resourceGroup().id, location)
 
@@ -79,7 +89,13 @@ module devopsmcpServer 'br/public:avm/res/app/container-app:0.8.0' = {
     scaleMinReplicas: 1
     scaleMaxReplicas: 10
     secrets: {
+
       secureList:  [
+        {
+          name: toLower(azureAdClientSecretName)
+          keyVaultUrl: '${keyVault.outputs.uri}secrets/${azureAdClientSecretName}'
+          identity: devopsmcpServerIdentity.outputs.resourceId
+        }  
       ]
     }
     containers: [
@@ -100,8 +116,28 @@ module devopsmcpServer 'br/public:avm/res/app/container-app:0.8.0' = {
             value: devopsmcpServerIdentity.outputs.clientId
           }
           {
+            name: 'AZURE_KEY_VAULT_NAME'
+            value: keyVault.outputs.name
+          }
+          {
+            name: 'AZURE_KEY_VAULT_ENDPOINT'
+            value: keyVault.outputs.uri
+          }
+          {
             name: 'PORT'
             value: '8080'
+          }
+          {
+            name: 'AzureAd__ClientId'
+            value: azureAdClientId
+          }
+          {
+            name: 'AzureAd__TenantId'
+            value: azureAdTenantId
+          }
+          {
+            name: 'AzureAd__ClientSecret'
+            secretRef: toLower(azureAdClientSecretName)
           }
         ]
       }
@@ -121,5 +157,39 @@ module devopsmcpServer 'br/public:avm/res/app/container-app:0.8.0' = {
     tags: union(tags, { 'azd-service-name': 'devopsmcp-server' })
   }
 }
+// Create a keyvault to store secrets
+module keyVault 'br/public:avm/res/key-vault/vault:0.12.0' = {
+  name: 'keyvault'
+  params: {
+    name: '${abbrs.keyVaultVaults}${resourceToken}'
+    location: location
+    tags: tags
+    enableRbacAuthorization: false
+    accessPolicies: [
+      {
+        objectId: principalId
+        permissions: {
+          secrets: [ 'get', 'list', 'set' ]
+        }
+      }
+      {
+        objectId: devopsmcpServerIdentity.outputs.principalId
+        permissions: {
+          secrets: [ 'get', 'list' ]
+        }
+      }
+    ]
+    secrets: [
+      {
+        name: azureAdClientSecretName
+        value: azureAdClientSecret
+      }
+    ]
+  }
+}
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer
-output AZURE_RESOURCE_DEVOPSMCP_SERVER_ID string = devopsmcpServer.outputs.resourceId
+output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.uri
+output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+output AZURE_RESOURCE_VAULT_ID string = keyVault.outputs.resourceId
+output AZURE_CONTAINER_APP_FQDN string = devopsmcpServer.outputs.fqdn
+output AZURE_CONTAINER_APP_NAME string = devopsmcpServer.outputs.name
