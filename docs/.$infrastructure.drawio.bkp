@@ -1,0 +1,48 @@
+<mxfile host="65bd71144e">
+    <diagram id="Is6tg40ktxO9kYGU6kvo" name="Azure Infrastructure">
+        <mxGraphModel dx="1864" dy="1890" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-15" value="Azure Resource Group" style="swimlane;rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="-60" width="1000" height="700" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-16" value="Container Apps Environment" style="swimlane;dashed=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b7b7b7;" parent="PiL-HCoYhbIvXNobRCiB-15" vertex="1">
+                    <mxGeometry x="120" y="100" width="600" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-17" value="Azure Container App (MCP Server)" style="shape=mxgraph.azure2.container_apps;whiteSpace=wrap;html=1;" parent="PiL-HCoYhbIvXNobRCiB-16" vertex="1">
+                    <mxGeometry x="200" y="120" width="180" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-18" value="Azure Key Vault" style="shape=mxgraph.azure2.key_vaults;whiteSpace=wrap;html=1;" parent="PiL-HCoYhbIvXNobRCiB-15" vertex="1">
+                    <mxGeometry x="120" y="540" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-19" value="Azure Container Registry" style="shape=mxgraph.azure2.container_registries;whiteSpace=wrap;html=1;" parent="PiL-HCoYhbIvXNobRCiB-15" vertex="1">
+                    <mxGeometry x="680" y="540" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-20" value="Log Analytics Workspace" style="shape=mxgraph.azure2.log_analytics_workspaces;whiteSpace=wrap;html=1;" parent="PiL-HCoYhbIvXNobRCiB-15" vertex="1">
+                    <mxGeometry x="320" y="540" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-21" value="Application Insights" style="shape=mxgraph.azure2.application_insights;whiteSpace=wrap;html=1;" parent="PiL-HCoYhbIvXNobRCiB-15" vertex="1">
+                    <mxGeometry x="500" y="540" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-22" value="pulls image" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#82b366;" parent="PiL-HCoYhbIvXNobRCiB-15" source="PiL-HCoYhbIvXNobRCiB-17" target="PiL-HCoYhbIvXNobRCiB-19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-23" value="retrieves secrets" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#d6b656;" parent="PiL-HCoYhbIvXNobRCiB-15" source="PiL-HCoYhbIvXNobRCiB-17" target="PiL-HCoYhbIvXNobRCiB-18" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-24" value="logs/metrics" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#6c8ebf;" parent="PiL-HCoYhbIvXNobRCiB-15" source="PiL-HCoYhbIvXNobRCiB-17" target="PiL-HCoYhbIvXNobRCiB-20" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="PiL-HCoYhbIvXNobRCiB-25" value="telemetry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#6c8ebf;" parent="PiL-HCoYhbIvXNobRCiB-15" source="PiL-HCoYhbIvXNobRCiB-17" target="PiL-HCoYhbIvXNobRCiB-21" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="470" y="420"/>
+                            <mxPoint x="560" y="420"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
