@@ -9,6 +9,7 @@
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Deploying to Azure with Azure Development CLI](#deploying-to-azure-with-azure-development-cli-azd)
 - [Authentication & Permissions](#authentication--permissions)
 - [Configuration](#configuration)
 - [Usage](#usage)
@@ -25,10 +26,13 @@
 ## Overview
 
 This project demonstrates how to create an MCP Server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk) to manage Azure DevOps resources. It provides tools for listing projects, repositories, branches, and creating new branches via MCP server integration. All operations require authentication via Microsoft Entra ID, using the on-behalf-of flow for Azure DevOps.
-
+<div>
 <video src="docs/videos/showcase.mp4" width="640" height="480" controls></video>
+</div>
 
-For a full-featured MCP solution, check out the official MCP Azure DevOps server by Microsoft: https://github.com/microsoft/azure-devops-mcp
+**[▶ Watch the showcase video (MP4, 2 min)](docs/videos/showcase.mp4)**
+
+For a full-featured MCP solution, check out the official MCP Azure DevOps server by Microsoft: <https://github.com/microsoft/azure-devops-mcp>
 
 ## Features
 
@@ -47,23 +51,136 @@ For a full-featured MCP solution, check out the official MCP Azure DevOps server
 ## Installation
 
 1. Clone the repository:
+
    ```sh
    git clone https://github.com/heluxenhofer/mcp-server-azure-devops.git
    ```
+
 2. Change to the project directory:
+
    ```sh
    cd .\src\DevOpsMcp.Server\
    ```
+
 3. Restore and build the project:
+
    ```sh
    dotnet restore
    dotnet build
    ```
+
 4. Run the project:
-   ```sh
-   dotnet run
-   ```
-   The MCP Server will start at `http://localhost:7071/`.
+
+  ```sh
+  dotnet run
+  ```
+
+  The MCP Server will start at `http://localhost:7071/`.
+
+## Deploying to Azure with Azure Development CLI (azd)
+
+### Required Environment Variables
+
+Before deploying the application with `azd`, you must set the following environment variables for Microsoft Entra ID authentication:
+
+- `AZUREAD_CLIENTID`: The Application (client) ID of your Entra ID app registration
+- `AZUREAD_CLIENTSECRET`: The client secret for your Entra ID app registration
+- `AZUREAD_TENANTID`: The Directory (tenant) ID of your Entra ID
+
+These variables must be set before running `azd provision` or `azd deploy`, as they are required for the application to authenticate with Microsoft Entra ID. You can set them in the `.env` file for your environment (e.g., `.azure/<environment>/.env`).
+All other environment variables (such as resource group, region, container app name, etc.) are automatically set and managed by `azd` during provisioning and deployment.
+
+You can deploy this MCP Server to Azure using the [Azure Developer CLI (azd)](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/overview). This enables automated provisioning of infrastructure and application deployment using the Bicep files in the `infra/` directory.
+
+### Setting the MCP Resource FQDN with `set-env-vars.ps1`
+
+After deployment, the `set-env-vars.ps1` PowerShell script is executed as a `postdeploy` hook, as specified in `azure.yaml`:
+
+```yaml
+hooks:
+  postdeploy:
+    shell: pwsh
+    run: ./set-env-vars.ps1
+```
+
+**What this does:**
+
+- The script runs after the app and resources are deployed.
+- It uses environment variables that are set from the outputs of the Bicep deployment (such as the Container App FQDN and resource group name). These outputs are automatically exported by `azd` and made available to the script after provisioning.
+- It sets the `MCP_RESOURCE_FQDN` environment variable in the Azure Container App, using the fully qualified domain name (FQDN) provisioned in Azure.
+- This environment variable is used by the application to construct its public resource metadata URL.
+
+**You can further customize `set-env-vars.ps1` if your application needs to set additional environment variables or use other Bicep outputs.**
+
+### Prerequisites
+
+- Azure subscription and account with sufficient permissions
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd) installed
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+
+### Steps
+
+1. **Login to Azure**
+
+  ```sh
+  azd auth login
+  ```
+
+2. **Initialize the environment**
+
+  ```sh
+  azd init
+  ```
+
+  Follow the prompts to select the environment name and Azure location.
+
+3. **Provision Azure resources**
+
+  ```sh
+  azd provision
+  ```
+
+  This will deploy all resources defined in `infra/` using Bicep.
+
+4. **Deploy the application**
+
+  ```sh
+  azd deploy
+  ```
+
+  This will build and deploy the MCP Server to the provisioned Azure resources.
+
+5. **View the deployed app**
+  After deployment, azd will output the endpoint URL. You can access your MCP Server at this address.
+
+### Infrastructure as Code
+
+All Azure resources are defined in the `infra/` directory using Bicep. You can customize these files to fit your requirements.
+
+<div style="display: flex; align-items: flex-start;">
+  <img src="./docs/images/infrastructure.png" alt="Infrastructure" style="width: 45%; max-width: 250px; margin-right: 24px;" />
+  <div style="flex: 1;">
+    <h4>Azure Resources Deployed (from <code>infra/main.bicep</code>):</h4>
+    <ul>
+      <li><strong>Resource Group</strong>: Logical container for all resources.</li>
+      <li><strong>Azure Container App Environment</strong>: Provides the hosting environment for one or more container apps, enabling secure networking and Dapr integration.</li>
+      <li><strong>Azure Container App</strong>: Hosts the MCP Server application as a scalable containerized service within the Container App Environment.</li>
+            <li><strong>Azure Managed Identity</strong>: Provides secure identity for the app to access Azure resources without secrets.</li>
+            <li><strong>About Azure Container Registry</strong>: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.</li>
+      <li><strong>Log Analytics Workspace</strong>: Collects and analyzes logs from the Container App for monitoring and diagnostics.</li>
+        <li><strong>Application Insights</strong>: Provides monitoring and observability for the MCP Server application. Application Insights collects telemetry data such as requests, dependencies, exceptions, and performance metrics, enabling you to analyze usage, diagnose issues, and ensure the health of the deployed service.</li>
+      <li><strong>Azure Key Vault</strong>: Stores secrets and sensitive configuration securely.</li>
+    </ul>
+    <p>See <code>infra/main.bicep</code> and <code>infra/resources.bicep</code> for the full list and configuration of deployed resources.</p>
+  </div>
+</div>
+
+### Troubleshooting & Documentation
+
+- [azd documentation](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/)
+- [Bicep documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
+
+If you encounter issues, check the azd output for error messages or consult the official documentation above.
 
 ## Authentication & Permissions
 
@@ -88,17 +205,18 @@ This MCP Server uses Microsoft Entra ID for authentication and authorization. Yo
 
 ## Configuration
 
-Update `appsettings.json` (or use user secrets) with your Azure AD settings:
+Update `appsettings.json` (or use user secrets) with your Azure AD settings on local development:
 
 ```json
 {
   "AzureAd": {
-	"ClientId": "",
-	"ClientSecret": "",
-	"TenantId": ""
+ "ClientId": "",
+ "ClientSecret": "",
+ "TenantId": ""
   }
 }
 ```
+For deployment to Azure reference [Deployment section](#deploying-to-azure-with-azure-development-cli-azd)
 
 ## Usage
 
@@ -118,25 +236,26 @@ Example `mcp.json` configuration ([docs](https://code.visualstudio.com/docs/copi
 ```json
 {
   "servers": {
-	"daenet-devops-mcp": {
-	  "type": "http",
-	  "dev": {},
-	  "url": "http://localhost:7071",
-	  "args": [
-		"${input:ado_org}"
-	  ]
-	}
+ "daenet-devops-mcp": {
+   "type": "http",
+   "dev": {},
+   "url": "http://localhost:7071",
+   "args": [
+  "${input:ado_org}"
+   ]
+ }
   },
   "inputs": [
-	{
-	  "id": "ado_org",
-	  "type": "promptString",
-	  "description": "Azure DevOps organization name (e.g. 'contoso')",
-	  "password": false
-	}
+ {
+   "id": "ado_org",
+   "type": "promptString",
+   "description": "Azure DevOps organization name (e.g. 'contoso')",
+   "password": false
+ }
   ]
 }
 ```
+***Note: For using deployed MCP Server in Azure, reference Container App public url.***
 
 ## Example Prompts
 
@@ -169,7 +288,7 @@ Please report security issues via GitHub Issues or directly to the maintainers.
 
 - [Azure DevOps REST API Documentation](https://learn.microsoft.com/en-us/rest/api/azure/devops/)
 - [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)
-- [Microsoft Entra ID App Registration](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app) 
+- [Microsoft Entra ID App Registration](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 
 ## Support
 
