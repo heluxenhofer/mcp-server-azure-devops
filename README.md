@@ -87,7 +87,7 @@ Before deploying the application with `azd`, you must set the following environm
 - `AZUREAD_CLIENTSECRET`: The client secret for your Entra ID app registration
 - `AZUREAD_TENANTID`: The Directory (tenant) ID of your Entra ID
 
-These variables must be set before running `azd provision` or `azd deploy`, as they are required for the application to authenticate with Microsoft Entra ID. You can set them in the `.env` file for your environment (e.g., `.azure/<environment>/.env`).
+These variables must be set before running `azd provision` or `azd deploy` and after `azd init`, as they are required for the application to authenticate with Microsoft Entra ID. You can set them in the `.env` file for your environment (e.g., `.azure/<environment>/.env`).
 All other environment variables (such as resource group, region, container app name, etc.) are automatically set and managed by `azd` during provisioning and deployment.
 
 You can deploy this MCP Server to Azure using the [Azure Developer CLI (azd)](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/overview). This enables automated provisioning of infrastructure and application deployment using the Bicep files in the `infra/` directory.
