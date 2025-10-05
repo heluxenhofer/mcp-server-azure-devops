@@ -163,10 +163,10 @@ All Azure resources are defined in the `infra/` directory using Bicep. You can c
     <h4>Azure Resources Deployed (from <code>infra/main.bicep</code>):</h4>
     <ul>
       <li><strong>Resource Group</strong>: Logical container for all resources.</li>
-      <li><strong>Azure Container App Environment</strong>: Provides the hosting environment for one or more container apps, enabling secure networking and Dapr integration.</li>
+      <li><strong>Azure Container App Environment</strong>: Provides the hosting environment for one or more container apps</li>
       <li><strong>Azure Container App</strong>: Hosts the MCP Server application as a scalable containerized service within the Container App Environment.</li>
             <li><strong>Azure Managed Identity</strong>: Provides secure identity for the app to access Azure resources without secrets.</li>
-            <li><strong>About Azure Container Registry</strong>: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.</li>
+            <li><strong>Azure Container Registry</strong>: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.</li>
       <li><strong>Log Analytics Workspace</strong>: Collects and analyzes logs from the Container App for monitoring and diagnostics.</li>
         <li><strong>Application Insights</strong>: Provides monitoring and observability for the MCP Server application. Application Insights collects telemetry data such as requests, dependencies, exceptions, and performance metrics, enabling you to analyze usage, diagnose issues, and ensure the health of the deployed service.</li>
       <li><strong>Azure Key Vault</strong>: Stores secrets and sensitive configuration securely.</li>
