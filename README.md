@@ -194,7 +194,7 @@ This MCP Server uses Microsoft Entra ID for authentication and authorization. Yo
 
 1. Sign in to the [Azure Portal](https://portal.azure.com/).
 2. Create a new App Registration in your Entra ID tenant ([instructions](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)).
-3. Add the redirect URI: `http://localhost:7071/callback`
+3. Add the redirect URI: `http://localhost:7071/callback` for local development or public Url of your container app
 4. Create a client secret ([instructions](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials?tabs=client-secret)).
 5. Add API permissions as shown below:
 
