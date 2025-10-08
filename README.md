@@ -169,7 +169,19 @@ All Azure resources are defined in the `infra/` directory using Bicep. You can c
 
 
 
-| ![Infrastructure](./docs/images/infrastructure.png) | **Azure Resources Deployed (from `infra/main.bicep`)**<br><br>- **Resource Group**: Logical container for all resources.<br>- **Azure Container App Environment**: Provides the hosting environment for one or more container apps<br>- **Azure Container App**: Hosts the MCP Server application as a scalable containerized service within the Container App Environment.<br>- **Azure Managed Identity**: Provides secure identity for the app to access Azure resources without secrets.<br>- **Azure Container Registry**: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.<br>- **Log Analytics Workspace**: Collects and analyzes logs from the Container App for monitoring and diagnostics.<br>- **Application Insights**: Provides monitoring and observability for the MCP Server application. All logs and telemetry from the application are sent via the .NET `ILogger` interface to Application Insights when running in Azure. Application Insights collects telemetry data such as requests, dependencies, exceptions, and performance metrics, enabling you to analyze usage, diagnose issues, and ensure the health of the deployed service.<br>- **Azure Key Vault**: Stores secrets and sensitive configuration securely.<br><br>See `infra/main.bicep` and `infra/resources.bicep` for the full list and configuration of deployed resources. |
+![Infrastructure](./docs/images/infrastructure.png) 
+
+Azure Resources Deployed (from `infra/main.bicep`)
+- **Resource Group**: Logical container for all resources.
+- **Azure Container App Environment**: Provides the hosting environment for one or more container apps
+- **Azure Container App**: Hosts the MCP Server application as a scalable containerized service within the Container App Environment.
+- **Azure Managed Identity**: Provides secure identity for the app to access Azure resources without secrets.
+- **Azure Container Registry**: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.
+- **Log Analytics Workspace**: Collects and analyzes logs from the Container App for monitoring and diagnostics.
+- **Application Insights**: Provides monitoring and observability for the MCP Server application. All logs and telemetry from the application are sent via the .NET `ILogger` interface to Application Insights when running in Azure. Application Insights collects telemetry data such as requests, dependencies, exceptions, and performance metrics, enabling you to analyze usage, diagnose issues, and ensure the health of the deployed service.
+- **Azure Key Vault**: Stores secrets and sensitive configuration securely.
+
+See `infra/main.bicep` and `infra/resources.bicep` for the full list and configuration of deployed resources. |
 
 ### Troubleshooting & Documentation
 
