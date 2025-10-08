@@ -12,7 +12,7 @@ namespace DevOpsMcp.Server.Tools;
 /// Provides tools for interacting with Azure DevOps, such as listing projects, repositories, branches, and creating branches.
 /// </summary>
 [McpServerToolType]
-public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient httpClient)
+public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient httpClient, ILogger<AzureDevOpsTool> logger)
 {
     /// <summary>
     /// Gets all Azure DevOps projects by organization name.
@@ -31,9 +31,9 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             var result = await response.Content.ReadAsStringAsync();
             return result;
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Request failed: {ex.Message}");
+            logger.LogError(ex, "Failed to list projects for organization {OrgName}", orgName);
             throw;
         }
     }
@@ -56,9 +56,9 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             var result = await response.Content.ReadAsStringAsync();
             return result;
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Request failed: {ex.Message}");
+            logger.LogError(ex, "Failed to list repositories for project {ProjectName} in organization {OrgName}", projectName, orgName);
             throw;
         }
     }
@@ -101,9 +101,9 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
                 }
             }
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Request failed: {ex.Message}");
+            logger.LogError(ex, "Failed to list branches for repository {RepositoryName} in project {ProjectName} of organization {OrgName}", repositoryName, projectName, orgName);
             throw;
         }
 
@@ -195,9 +195,9 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
 
             return true;
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Request failed: {ex.Message}");
+            logger.LogError(ex, "Failed to create branch {NewBranchName} in repository {RepositoryName} of project {ProjectName} in organization {OrgName}", newBranchName, repositoryName, projectName, orgName);
             throw;
         }
 
