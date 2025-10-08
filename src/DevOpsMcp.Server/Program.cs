@@ -7,6 +7,15 @@ using ModelContextProtocol.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+// Add Application Insights telemetry
+builder.Services.AddApplicationInsightsTelemetry();
+builder.Logging.AddApplicationInsights();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Logging.AddConsole();
+}
+
 // Determine the port and base URLs for the server and resource metadata.
 //
 // This section allows the application to run both locally (for development) and in a containerized/cloud environment.
@@ -92,9 +101,10 @@ app.UseAuthorization();
 // <see link href="https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMcpServer/Program.cs">
 app.MapMcp().RequireAuthorization();
 
-Console.WriteLine($"Starting MCP server with authorization at {serverUrl}");
-Console.WriteLine($"Protected Resource Metadata URL: {resourceUrl}.well-known/oauth-protected-resource");
-Console.WriteLine("Press Ctrl+C to stop the server");
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+logger.LogInformation($"Starting MCP server with authorization at {serverUrl}");
+logger.LogInformation($"Protected Resource Metadata URL: {resourceUrl}.well-known/oauth-protected-resource");
+logger.LogInformation("Press Ctrl+C to stop the server");
 
 app.Run(serverUrl);
-
