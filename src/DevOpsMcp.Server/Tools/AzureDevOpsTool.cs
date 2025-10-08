@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using System.Text;
-using System.Text.Json;
-using Microsoft.AspNetCore.Hosting.Server;
+﻿using DevOpsMcp.Server.Models;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
+using System.ComponentModel;
+using System.Text;
+using System.Text.Json;
 using static ModelContextProtocol.Protocol.ElicitRequestParams;
 
 namespace DevOpsMcp.Server.Tools;
@@ -21,20 +21,19 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// <returns>A JSON string containing the list of projects.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     [McpServerTool, Description("List all Azure DevOps projects by organization name")]
-    public async Task<string> ListProjects([Description("Organization name in Azure DevOps")] string orgName)
+    public async Task<ToolResponse<string>> ListProjects([Description("Organization name in Azure DevOps")] string orgName)
     {
-
         try
         {
             var response = await httpClient.GetAsync($"{orgName}/_apis/projects");
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
-            return result;
+            return ToolResponse<string>.Ok(result);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to list projects for organization {OrgName}", orgName);
-            throw;
+            return ToolResponse<string>.Fail(ex.Message);
         }
     }
     /// <summary>
@@ -45,7 +44,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// <returns>A JSON string containing the list of repositories.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     [McpServerTool, Description("List repositories for a specific project in an Azure Devops organization")]
-    public async Task<string> ListRepositories(
+    public async Task<ToolResponse<string>> ListRepositories(
         [Description("Organization name in Azure DevOps")] string orgName,
         [Description("Project name for given organization in Azure DevOps")] string projectName)
     {
@@ -54,7 +53,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             var response = await httpClient.GetAsync($"{orgName}/{projectName}/_apis/git/repositories");
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
-            return result;
+            return ToolResponse<string>.Ok(result);
         }
         catch (Exception ex)
         {
@@ -71,7 +70,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// <returns>An array of branch names.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     [McpServerTool, Description("List branches for a given project and repository in an Azure Devops organization")]
-    public async Task<string[]> ListBranches(
+    public async Task<ToolResponse<string>> ListBranches(
         [Description("Organization name in Azure DevOps")] string orgName,
         [Description("Project name for given organization in Azure DevOps")] string projectName,
         [Description("Repository name for given project in Azure DevOps")] string repositoryName)
@@ -100,15 +99,16 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
                     }
                 }
             }
+            var json = JsonSerializer.Serialize(branches);
+            return ToolResponse<string>.Ok(json);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to list branches for repository {RepositoryName} in project {ProjectName} of organization {OrgName}", repositoryName, projectName, orgName);
-            throw;
+            return ToolResponse<string>.Fail(ex.Message);
         }
-
-        return [.. branches];
     }
+
     /// <summary>
     /// Creates a new branch in a repository. If parent branch is not provided, user will be asked.
     /// </summary>
@@ -121,52 +121,53 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// <returns>True if the branch was created successfully; otherwise, false.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     /// <exception cref="InvalidOperationException">Thrown when required information is missing or invalid.</exception>
-    [McpServerTool, Description("Create a new branch in a repository. If parent branch is not provided, user will be asked.")]
-    public async Task<bool> CreateBranch(
+    [McpServerTool, Description("Create a new branch in a repository.")]
+    public async Task<ToolResponse<string>> CreateBranch(
         IMcpServer server,
         [Description("Organization name in Azure DevOps")] string orgName,
         [Description("Project name for given organization in Azure DevOps")] string projectName,
         [Description("Repository name for given project in Azure DevOps")] string repositoryName,
         [Description("Name of the new branch")] string newBranchName,
-        CancellationToken cancellationToken)
+        [Description("Name of the parent branch from which new branch will be created.")] string parentBranchName = "",
+        CancellationToken cancellationToken = default)
     {
-        var branches = await ListBranches(orgName, projectName, repositoryName);
-        var enumSchema = new EnumSchema
-        {
-            Enum = branches
-        };
-        // Ask the user for parent branch
-        var branchSchema = new RequestSchema
-        {
-            Properties =
-            {
-                ["ParentBranch"] = enumSchema,
-            },
-            Required = ["ParentBranch"]
-        };
-
-        var branchResponse = await server.ElicitAsync(new ElicitRequestParams
-        {
-            Message = $"From which branch do you want to create your new branch in repository {repositoryName}?",
-            RequestedSchema = branchSchema
-
-        }, cancellationToken);
-
-        if (branchResponse.Content == null)
-        {
-            throw new InvalidOperationException("Branch response content is null.");
-        }
-        if (!branchResponse.Content.TryGetValue("ParentBranch", out JsonElement parentBranchElement) || parentBranchElement.ValueKind != JsonValueKind.String)
-        {
-            throw new InvalidOperationException("ParentBranch is required and must be a string.");
-        }
-        var parentBranchName = parentBranchElement.GetString();
-
         try
         {
+
+            string branchToUse = parentBranchName;
+            if (string.IsNullOrEmpty(branchToUse))
+            {
+                if (server == null)
+                    throw new InvalidOperationException("Elicitation required but server is null.");
+
+                var branchesResponse = await ListBranches(orgName, projectName, repositoryName);
+                if(!branchesResponse.Success || string.IsNullOrEmpty(branchesResponse.Data))
+                    throw new InvalidOperationException("Could not retrieve branches for elicitation: " + branchesResponse.Error);
+                var branches = JsonSerializer.Deserialize<string[]>(branchesResponse.Data);
+                var enumSchema = new EnumSchema { Enum = branches! };
+                var branchSchema = new RequestSchema
+                {
+                    Properties = { ["ParentBranch"] = enumSchema },
+                    Required = ["ParentBranch"]
+                };
+
+                var branchResponse = await server.ElicitAsync(new ElicitRequestParams
+                {
+                    Message = $"From which branch do you want to create your new branch in repository {repositoryName}?",
+                    RequestedSchema = branchSchema
+                }, cancellationToken);
+
+                if (branchResponse.Content == null ||
+                    !branchResponse.Content.TryGetValue("ParentBranch", out JsonElement parentBranchElement) ||
+                    parentBranchElement.ValueKind != JsonValueKind.String)
+                {
+                    throw new InvalidOperationException("ParentBranch is required and must be a string.");
+                }
+
+                branchToUse = parentBranchElement.GetString();
+            }
             var encodedRepoName = Uri.EscapeDataString(repositoryName);
-            var encodedParentBranch = Uri.EscapeDataString(parentBranchName!);
-            // Step 1: Get the latest commit SHA of the parent branch
+            var encodedParentBranch = Uri.EscapeDataString(parentBranchName);
             var refUrl = $"{orgName}/{projectName}/_apis/git/repositories/{encodedRepoName}/refs/heads/{encodedParentBranch}";
             var refResponse = await httpClient.GetAsync(refUrl, cancellationToken);
             refResponse.EnsureSuccessStatusCode();
@@ -176,7 +177,6 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             if (string.IsNullOrEmpty(objectId))
                 throw new InvalidOperationException($"Could not find objectId for branch {parentBranchName}");
 
-            // Step 2: Create the new branch (correct endpoint and JSON)
             var createBranchUrl = $"{orgName}/{projectName}/_apis/git/repositories/{encodedRepoName}/refs?api-version=7.1";
             var bodyArray = new[]
             {
@@ -190,15 +190,14 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-            var createResponse = await httpClient.PostAsync(createBranchUrl, content, cancellationToken);
-            createResponse.EnsureSuccessStatusCode();
-
-            return true;
+            var createdResponse = await httpClient.PostAsync(createBranchUrl, content, cancellationToken);
+            createdResponse.EnsureSuccessStatusCode();
+            return ToolResponse<string>.Ok($"Branch {newBranchName} created successfully from {parentBranchName}.");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create branch {NewBranchName} in repository {RepositoryName} of project {ProjectName} in organization {OrgName}", newBranchName, repositoryName, projectName, orgName);
-            throw;
+            return ToolResponse<string>.Fail(ex.Message);
         }
 
     }
