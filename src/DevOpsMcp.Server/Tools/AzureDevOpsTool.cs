@@ -59,7 +59,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to list repositories for project {ProjectName} in organization {OrgName}", projectName, orgName);
-            return ToolResponse<string>.Fail(ex.Message);
+            throw;
         }
     }
     /// <summary>
