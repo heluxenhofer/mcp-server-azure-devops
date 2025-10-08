@@ -7,6 +7,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+- [Monitoring](#monitoring)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Deploying to Azure with Azure Development CLI](#deploying-to-azure-with-azure-development-cli-azd)
@@ -26,11 +27,12 @@
 ## Overview
 
 This project demonstrates how to create an MCP Server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk) to manage Azure DevOps resources. It provides tools for listing projects, repositories, branches, and creating new branches via MCP server integration. All operations require authentication via Microsoft Entra ID, using the on-behalf-of flow for Azure DevOps.
-<div>
-<video src="docs/videos/showcase.mp4" width="640" height="480" controls></video>
-</div>
+
+## Showcase Video
 
 **[▶ Watch the showcase video (MP4, 2 min)](docs/videos/showcase.mp4)**
+
+## Official Microsoft Azure DevOps MCP Solution
 
 For a full-featured MCP solution, check out the official MCP Azure DevOps server by Microsoft: <https://github.com/microsoft/azure-devops-mcp>
 
@@ -40,6 +42,14 @@ For a full-featured MCP solution, check out the official MCP Azure DevOps server
 - List all repositories for a project
 - List all branches for a repository
 - Create a new branch from an existing branch
+
+## Monitoring
+
+This project uses cloud-native monitoring and logging to ensure reliability and observability.
+Monitoring and logging are handled via the .NET `ILogger` interface throughout the application.
+When deployed to Azure, all logs and telemetry are automatically sent to Application Insights, enabling diagnostics and performance tracking without extra configuration.
+For local development, logs are output to the console for easy debugging.
+No custom monitoring endpoints are exposed; all monitoring is managed through Application Insights in the cloud.
 
 ## Prerequisites
 
@@ -157,23 +167,21 @@ hooks:
 
 All Azure resources are defined in the `infra/` directory using Bicep. You can customize these files to fit your requirements.
 
-<div style="display: flex; align-items: flex-start;">
-  <img src="./docs/images/infrastructure.png" alt="Infrastructure" style="width: 45%; max-width: 250px; margin-right: 24px;" />
-  <div style="flex: 1;">
-    <h4>Azure Resources Deployed (from <code>infra/main.bicep</code>):</h4>
-    <ul>
-      <li><strong>Resource Group</strong>: Logical container for all resources.</li>
-      <li><strong>Azure Container App Environment</strong>: Provides the hosting environment for one or more container apps</li>
-      <li><strong>Azure Container App</strong>: Hosts the MCP Server application as a scalable containerized service within the Container App Environment.</li>
-            <li><strong>Azure Managed Identity</strong>: Provides secure identity for the app to access Azure resources without secrets.</li>
-            <li><strong>Azure Container Registry</strong>: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.</li>
-      <li><strong>Log Analytics Workspace</strong>: Collects and analyzes logs from the Container App for monitoring and diagnostics.</li>
-        <li><strong>Application Insights</strong>: Provides monitoring and observability for the MCP Server application. Application Insights collects telemetry data such as requests, dependencies, exceptions, and performance metrics, enabling you to analyze usage, diagnose issues, and ensure the health of the deployed service.</li>
-      <li><strong>Azure Key Vault</strong>: Stores secrets and sensitive configuration securely.</li>
-    </ul>
-    <p>See <code>infra/main.bicep</code> and <code>infra/resources.bicep</code> for the full list and configuration of deployed resources.</p>
-  </div>
-</div>
+
+
+![Infrastructure](./docs/images/infrastructure.png) 
+
+Azure Resources Deployed (from `infra/main.bicep`)
+- **Resource Group**: Logical container for all resources.
+- **Azure Container App Environment**: Provides the hosting environment for one or more container apps
+- **Azure Container App**: Hosts the MCP Server application as a scalable containerized service within the Container App Environment.
+- **Azure Managed Identity**: Provides secure identity for the app to access Azure resources without secrets.
+- **Azure Container Registry**: The Azure Container Registry (ACR) is a managed Docker registry service used to store and manage container images.
+- **Log Analytics Workspace**: Collects and analyzes logs from the Container App for monitoring and diagnostics.
+- **Application Insights**: Provides monitoring and observability for the MCP Server application. All logs and telemetry from the application are sent via the .NET `ILogger` interface to Application Insights when running in Azure. Application Insights collects telemetry data such as requests, dependencies, exceptions, and performance metrics, enabling you to analyze usage, diagnose issues, and ensure the health of the deployed service.
+- **Azure Key Vault**: Stores secrets and sensitive configuration securely.
+
+See `infra/main.bicep` and `infra/resources.bicep` for the full list and configuration of deployed resources. |
 
 ### Troubleshooting & Documentation
 
