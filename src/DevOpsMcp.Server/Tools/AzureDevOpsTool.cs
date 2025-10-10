@@ -11,6 +11,8 @@ namespace DevOpsMcp.Server.Tools;
 /// <summary>
 /// Provides tools for interacting with Azure DevOps, such as listing projects, repositories, branches, and creating branches.
 /// </summary>
+/// <param name="httpClient">The HTTP client used to communicate with Azure DevOps.</param>
+/// <param name="logger">The logger instance for logging errors and information.</param>
 [McpServerToolType]
 public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient httpClient, ILogger<AzureDevOpsTool> logger)
 {
@@ -18,7 +20,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// Gets all Azure DevOps projects by organization name.
     /// </summary>
     /// <param name="orgName">Organization name in Azure DevOps.</param>
-    /// <returns>A JSON string containing the list of projects.</returns>
+    /// <returns>A <see cref="ToolResponse{string}"/> containing the list of projects as a JSON string.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     [McpServerTool, Description("List all Azure DevOps projects by organization name")]
     public async Task<ToolResponse<string>> ListProjects([Description("Organization name in Azure DevOps")] string orgName)
@@ -41,7 +43,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// </summary>
     /// <param name="orgName">Organization name in Azure DevOps.</param>
     /// <param name="projectName">Project name for the given organization in Azure DevOps.</param>
-    /// <returns>A JSON string containing the list of repositories.</returns>
+    /// <returns>A <see cref="ToolResponse{string}"/> containing the list of repositories as a JSON string.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     [McpServerTool, Description("List repositories for a specific project in an Azure Devops organization")]
     public async Task<ToolResponse<string>> ListRepositories(
@@ -67,7 +69,7 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// <param name="orgName">Organization name in Azure DevOps.</param>
     /// <param name="projectName">Project name for the given organization in Azure DevOps.</param>
     /// <param name="repositoryName">Repository name for the given project in Azure DevOps.</param>
-    /// <returns>An array of branch names.</returns>
+    /// <returns>A <see cref="ToolResponse{string}"/> containing an array of branch names as a JSON string.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     [McpServerTool, Description("List branches for a given project and repository in an Azure Devops organization")]
     public async Task<ToolResponse<string>> ListBranches(
@@ -117,8 +119,9 @@ public class AzureDevOpsTool([FromKeyedServices("AzureDevOpsClient")] HttpClient
     /// <param name="projectName">Project name for the given organization in Azure DevOps.</param>
     /// <param name="repositoryName">Repository name for the given project in Azure DevOps.</param>
     /// <param name="newBranchName">Name of the new branch to create.</param>
+    /// <param name="parentBranchName">Name of the parent branch from which the new branch will be created. If not provided, the user will be prompted.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>True if the branch was created successfully; otherwise, false.</returns>
+    /// <returns>A <see cref="ToolResponse{string}"/> indicating success or failure, with a message.</returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails.</exception>
     /// <exception cref="InvalidOperationException">Thrown when required information is missing or invalid.</exception>
     [McpServerTool, Description("Create a new branch in a repository.")]
